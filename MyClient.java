@@ -92,7 +92,6 @@ public class MyClient {
                 for (int i = 0; i < 5; i++) {
                     response = reader.readLine();
                     System.out.println("Received message from server: " + response);
-
                     // Keep track of the largest server type and the number of servers of that type
                     // available
                 }
