@@ -35,7 +35,8 @@ public class MyClient {
             System.out.println("Received message from server: " + response);
 
             // While the last message from ds-server is not NONE do // jobs 1 - n
-            while (!response.equals("NONE")) {
+            int s = 0;
+            while (!response.contains("NONE")) {
                 // REDY
                 message = "REDY\n";
                 bytes = message.getBytes();
@@ -45,20 +46,6 @@ public class MyClient {
                 // JOBN
                 response = reader.readLine();
                 System.out.println("Received message from server: " + response);
-
-                // SCHD
-                String[] jobData = response.split("\\s+");
-                String jobID = jobData[2];
-                int estRuntime = Integer.parseInt(jobData[3]);
-                int coreCount = Integer.parseInt(jobData[4]);
-                int memory = Integer.parseInt(jobData[5]);
-                int disk = Integer.parseInt(jobData[6]);
-
-                String server = getLargestServer(coreCount, reader);
-                String schdMessage = "SCHD " + jobID + " " + server + "\n";
-                byte[] schdBytes = schdMessage.getBytes();
-                out.write(schdBytes);
-                System.out.println("Sent scheduling message to server: " + schdMessage);
 
                 // OK
                 response = reader.readLine();
@@ -85,15 +72,10 @@ public class MyClient {
                 System.out.println("Sent message to server: " + message);
 
                 // Receive DATA nRecs recSize // e.g., DATA 5 124
-                response = reader.readLine();
-                System.out.println("Received message from server: " + response);
-
-                // Receive nRecs records
-                for (int i = 0; i < 5; i++) {
-                    response = reader.readLine();
-                    System.out.println("Received message from server: " + response);
-                    // Keep track of the largest server type and the number of servers of that type
-                    // available
+                int nRecs = 0;
+                if ((response.contains("DATA"))) {
+                    String[] data = response.split("\\s+");
+                    nRecs = Integer.parseInt(data[1]);
                 }
 
                 // Send OK
@@ -102,10 +84,60 @@ public class MyClient {
                 out.write(bytes);
                 System.out.println("Sent message to server: " + message);
 
-                // Receive
+                // For loop to store records
+                for (int i = 0; i < nRecs; i++) {
+                    // Receive a record
+                    response = reader.readLine();
+                    System.out.println("Received message from server: " + response);
+                    // keep track of the number of records received
+                    s++;
+                }
 
-                // If the message received at Step 10 is JOBN then
+                // Send OK
+                message = "OK\n";
+                bytes = message.getBytes();
+                out.write(bytes);
+                System.out.println("Sent message to server: " + message);
+
+                // Recieve
+                response = reader.readLine();
+                System.out.println("Received message from server: " + response);
+
+                // If the message received at Step 10 is JOBN then schedule job
                 if (response.equals("JOBN")) {
+                    // SCHD
+                    String[] jobData = response.split("\\s+");
+                    String jobID = jobData[2];
+                    int estRuntime = Integer.parseInt(jobData[3]);
+                    int coreCount = Integer.parseInt(jobData[4]);
+                    int memory = Integer.parseInt(jobData[5]);
+                    int disk = Integer.parseInt(jobData[6]);
+
+                    // Identify the largest server type; you may do this only once
+                    // String server = getLargestServer(coreCount, reader);
+
+                    int c = 0; // finding largest server
+                    if (coreCount > c) {
+                        c = coreCount;
+                    }
+
+                    if (memory > c) {
+                        c = memory;
+                    }
+                    if (disk > c) {
+                        c = disk;
+                    }
+                    if (estRuntime > c) {
+                        c = estRuntime;
+                    }
+
+                    int server = c;
+
+                    String schdMessage = "SCHD " + jobID + " " + server + "\n";
+                    byte[] schdBytes = schdMessage.getBytes();
+                    out.write(schdBytes);
+                    System.out.println("Sent scheduling message to server: " + schdMessage);
+
                     message = "SCHD " + jobID + " " + server + "\n";
                     bytes = message.getBytes();
                     out.write(bytes);
@@ -124,10 +156,6 @@ public class MyClient {
             response = reader.readLine();
             System.out.println("Received message from server: " + response);
         }
-    }
-
-    private static String getLargestServer(int coreCount, BufferedReader reader) {
-        return null;
     }
 
 }
