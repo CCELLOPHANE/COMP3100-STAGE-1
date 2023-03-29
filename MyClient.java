@@ -66,7 +66,7 @@ public class MyClient {
                 System.out.println("Received message from server: " + response);
 
                 // Send a GETS message
-                message = "GETS All\n";
+                message = "GETS s \n";
                 bytes = message.getBytes();
                 out.write(bytes);
                 System.out.println("Sent message to server: " + message);
@@ -104,7 +104,7 @@ public class MyClient {
                 System.out.println("Received message from server: " + response);
 
                 // If the message received at Step 10 is JOBN then schedule job
-                if (response.equals("JOBN")) {
+                if (response.contains("JOBN")) {
                     // SCHD
                     String[] jobData = response.split("\\s+");
                     String jobID = jobData[2];
@@ -114,13 +114,10 @@ public class MyClient {
                     int disk = Integer.parseInt(jobData[6]);
 
                     // Identify the largest server type; you may do this only once
-                    // String server = getLargestServer(coreCount, reader);
-
-                    int c = 0; // finding largest server
+                    int c = 0; // finding largest server and if its the same checking other factors
                     if (coreCount > c) {
                         c = coreCount;
                     }
-
                     if (memory > c) {
                         c = memory;
                     }
@@ -132,7 +129,6 @@ public class MyClient {
                     }
 
                     int server = c;
-
                     String schdMessage = "SCHD " + jobID + " " + server + "\n";
                     byte[] schdBytes = schdMessage.getBytes();
                     out.write(schdBytes);
@@ -143,7 +139,6 @@ public class MyClient {
                     out.write(bytes);
                     System.out.println("Sent scheduling message to server: " + schdMessage);
                 }
-
             }
 
             // Quit
