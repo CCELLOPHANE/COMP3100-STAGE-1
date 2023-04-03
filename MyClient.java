@@ -4,9 +4,11 @@ import java.io.*;
 public class MyClient {
     public static void main(String[] args) throws IOException {
         String hostName = "localhost";
-        int portNumber = 500000;
+        int portNumber = 50000;
 
-        try (Socket socket = new Socket(hostName, portNumber)) {
+        try {
+            // Create a socket to make the connection to the server
+            Socket socket = new Socket(hostName, portNumber);
             System.out.println("Connected to server: " + socket.getInetAddress().getHostName());
 
             OutputStream out = socket.getOutputStream();
@@ -34,8 +36,31 @@ public class MyClient {
             response = reader.readLine();
             System.out.println("Received message from server: " + response);
 
+            // // JOBN
+            // response = reader.readLine();
+            // System.out.println("Received message from server: " + response);
+
+            // // OK
+            // response = reader.readLine();
+            // System.out.println("Received message from server: " + response);
+
+            // // OK
+            // message = "OK\n";
+            // bytes = message.getBytes();
+            // out.write(bytes);
+            // System.out.println("Sent message to server: " + message);
+
+            // // JCPL
+            // response = reader.readLine();
+            // System.out.println("Received message from server: " + response);
+
+            // // NONE
+            // response = reader.readLine();
+            // System.out.println("Received message from server: " + response);
+
             // While the last message from ds-server is not NONE do
-            int s = 0;
+            // String s = "";
+            response = "";
             while (!response.contains("NONE")) {
                 // Send REDY
                 message = "REDY\n";
@@ -47,7 +72,20 @@ public class MyClient {
                 response = reader.readLine();
                 System.out.println("Received message from server: " + response);
 
-                // identify largest server type, if the type is the same then use other parameters
+                // Send a GETS message
+                message = "GETS All \n";
+                bytes = message.getBytes();
+                out.write(bytes);
+                System.out.println("Sent message to server: " + message);
+
+                // Receive DATA nRecs recSize // e.g., DATA 5 124
+                int nRecs = 0;
+                if ((response.contains("DATA"))) {
+                    String[] data = response.split("\\s+");
+                    nRecs = Integer.parseInt(data[1]);
+                }
+
+                // identify largest server type
                 // SCHD
                 String[] jobData = response.split("\\s+");
                 String jobID = jobData[2];
@@ -69,19 +107,6 @@ public class MyClient {
                     c = estRuntime;
                 }
 
-                // Send a GETS message
-                message = "GETS s \n";
-                bytes = message.getBytes();
-                out.write(bytes);
-                System.out.println("Sent message to server: " + message);
-
-                // Receive DATA nRecs recSize // e.g., DATA 5 124
-                int nRecs = 0;
-                if ((response.contains("DATA"))) {
-                    String[] data = response.split("\\s+");
-                    nRecs = Integer.parseInt(data[1]);
-                }
-
                 // Send OK
                 message = "OK\n";
                 bytes = message.getBytes();
@@ -94,7 +119,7 @@ public class MyClient {
                     response = reader.readLine();
                     System.out.println("Received message from server: " + response);
                     // keep track of the number of records received
-                    s++;
+                    i++;
                 }
 
                 // Send OK
@@ -121,6 +146,7 @@ public class MyClient {
                     System.out.println("Sent scheduling message to server: " + schdMessage);
                 }
             }
+
             // Send QUIT
             message = "QUIT\n";
             bytes = message.getBytes();
@@ -133,10 +159,11 @@ public class MyClient {
 
             // Close the socket
             socket.close();
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-            System.exit(1);
+
+        } catch (IOException e) {
+            System.err.println("Error: " + e.getMessage());
         }
+
     }
 
 }
