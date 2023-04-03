@@ -36,30 +36,6 @@ public class MyClient {
             response = reader.readLine();
             System.out.println("Received message from server: " + response);
 
-            // // JOBN
-            // response = reader.readLine();
-            // System.out.println("Received message from server: " + response);
-
-            // // OK
-            // response = reader.readLine();
-            // System.out.println("Received message from server: " + response);
-
-            // // OK
-            // message = "OK\n";
-            // bytes = message.getBytes();
-            // out.write(bytes);
-            // System.out.println("Sent message to server: " + message);
-
-            // // JCPL
-            // response = reader.readLine();
-            // System.out.println("Received message from server: " + response);
-
-            // // NONE
-            // response = reader.readLine();
-            // System.out.println("Received message from server: " + response);
-
-            // While the last message from ds-server is not NONE do
-            // String s = "";
             response = "";
             while (!response.contains("NONE")) {
                 // Send REDY
