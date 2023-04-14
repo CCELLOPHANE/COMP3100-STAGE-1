@@ -102,7 +102,6 @@ public class MyClient {
                 serverCore = Integer.parseInt(responseType[4]);
                 serverID = Integer.parseInt(responseType[1]);
             }
-            // If sever type is the same keep track of how many server we have
             if (serverType.equals(responseType[0])) {
                 serverID = Integer.parseInt(responseType[1]);
             }
@@ -127,7 +126,6 @@ public class MyClient {
                 if (ID > serverID) {
                     ID = 0;
                 }
-                // Doing the round robin
                 message = "SCHD " + jobID + " " + serverType + " " + ID + "\n";
                 bytes = message.getBytes();
                 out.write(bytes);
