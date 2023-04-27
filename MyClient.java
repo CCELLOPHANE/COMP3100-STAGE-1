@@ -11,7 +11,7 @@ public class MyClient {
         System.out.println("Connected to server: " + socket.getInetAddress().getHostName());
 
         OutputStream out = socket.getOutputStream();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
         // HELO
         String message = "HELO\n";
@@ -93,7 +93,7 @@ public class MyClient {
         int serverID = 0;
         int serverCore = 0;
 
-        // Find the server with the most cores
+
         for (int i = 0; i < nRecs; i++) {
             response = reader.readLine();
             String[] responseType = response.split(" ");
@@ -102,7 +102,7 @@ public class MyClient {
                 serverCore = Integer.parseInt(responseType[4]);
                 serverID = Integer.parseInt(responseType[1]);
             }
-            // If sever type is the same keep track of how many server we have
+
             if (serverType.equals(responseType[0])) {
                 serverID = Integer.parseInt(responseType[1]);
             }
@@ -121,24 +121,24 @@ public class MyClient {
         out.flush();
         int ID = 0;
 
-        while (!responseS.contains("NONE")) {
-            // If the response is jobn n keep scheluling untill we reach NONE
-            if (responseS.contains("JOBN")) {
+        while (!RESPONSE.contains("NONE")) {
+            if (RESPONSE.contains("JOBN")) {
                 if (ID > serverID) {
                     ID = 0;
                 }
-                // Doing the round robin
+ 
                 message = "SCHD " + jobID + " " + serverType + " " + ID + "\n";
                 bytes = message.getBytes();
                 out.write(bytes);
                 System.out.println("Sent message to server: " + message);
+                
                 response = reader.readLine();
                 System.out.println("Received message from server: " + response);
                 out.flush();
+                
                 ID++;
 
             }
-            // If the response is JCPL n keep scheluling until we reach NONE
             message = "REDY\n";
             bytes = message.getBytes();
             out.write(bytes);
@@ -147,7 +147,6 @@ public class MyClient {
             response = reader.readLine();
             r = response;
 
-            // Saving job ID
             if (r.contains("JOBN")) {
                 String[] jobCom = r.split(" ");
                 jobID = Integer.parseInt(jobCom[2]);
@@ -157,17 +156,15 @@ public class MyClient {
             out.flush();
         }
 
-        // Send QUIT
+        // QUIT
         message = "QUIT\n";
         bytes = message.getBytes();
         out.write(bytes);
         System.out.println("Sent message to server: " + message);
 
-        // Recieve QUIT
         response = reader.readLine();
         System.out.println("Received message from server: " + response);
 
-        // Close the socket
         out.close();
         reader.close();
         socket.close();
