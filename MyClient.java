@@ -11,9 +11,8 @@ public class MyClient {
             Socket socket = new Socket(hostName, portNumber);
             System.out.println("Connected to server: " + socket.getInetAddress().getHostName());
 
-            OutputStream out = socket.getOutputStream();
-            InputStream in = socket.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        OutputStream out = socket.getOutputStream();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 
             // HELO from my week 2 workshop
             String message = "HELO\n";
@@ -89,14 +88,39 @@ public class MyClient {
                 out.write(bytes);
                 System.out.println("Sent message to server: " + message);
 
-                // For loop to store records
-                for (int i = 0; i < nRecs; i++) {
-                    // Receive a record
-                    response = reader.readLine();
-                    System.out.println("Received message from server: " + response);
-                    // keep track of the number of records received
-                    i++;
-                }
+        // For loop to store records
+        for (int i = 0; i < nRecs; i++) {
+            // Receive a record
+            response = reader.readLine();
+            System.out.println("Received message from server: " + response);
+            // Keep track of the number of records received
+            i++;
+        }
+
+        message = "OK\n";
+        bytes = message.getBytes();
+        out.write(bytes);
+        System.out.println("Sent message to server: " + message);
+
+        String serverType = "";
+        int serverID = 0;
+        int serverCore = 0;
+
+        // Find the server with the most cores
+        for (int i = 0; i < nRecs; i++) {
+            response = reader.readLine();
+            String[] responseType = response.split(" ");
+            if (serverCore < Integer.parseInt(responseType[4])) {
+                serverType = responseType[0];
+                serverCore = Integer.parseInt(responseType[4]);
+                serverID = Integer.parseInt(responseType[1]);
+            }
+            // If sever type is the same keep track of how many server we have
+            if (serverType.equals(responseType[0])) {
+                serverID = Integer.parseInt(responseType[1]);
+            }
+            System.out.println("Received message from server: " + response);
+        }
 
                 // Send OK
                 message = "OK\n";
@@ -116,21 +140,39 @@ public class MyClient {
                     out.write(schdBytes);
                     System.out.println("Sent scheduling message to server: " + schdMessage);
 
-                    message = "SCHD " + jobID + " " + server + "\n";
-                    bytes = message.getBytes();
-                    out.write(bytes);
-                    System.out.println("Sent scheduling message to server: " + schdMessage);
+        while (!responseS.contains("NONE")) {
+            // If the response is jobn n keep scheluling untill we reach NONE
+            if (responseS.contains("JOBN")) {
+                if (ID > serverID) {
+                    ID = 0;
                 }
-            }
+                // Doing the round robin
+                message = "SCHD " + jobID + " " + serverType + " " + ID + "\n";
+                bytes = message.getBytes();
+                out.write(bytes);
+                System.out.println("Sent message to server: " + message);
+                response = reader.readLine();
+                System.out.println("Received message from server: " + response);
+                out.flush();
+                ID++;
 
-            // Send QUIT
-            message = "QUIT\n";
+            }
+            // If the response is JCPL n keep scheluling until we reach NONE
+            message = "REDY\n";
             bytes = message.getBytes();
             out.write(bytes);
             System.out.println("Sent message to server: " + message);
 
             // Recieve QUIT
             response = reader.readLine();
+            r = response;
+
+            // Saving job ID
+            if (r.contains("JOBN")) {
+                String[] jobCom = r.split(" ");
+                jobID = Integer.parseInt(jobCom[2]);
+            }
+
             System.out.println("Received message from server: " + response);
 
             // Close the socket
@@ -140,6 +182,20 @@ public class MyClient {
             System.err.println("Error: " + e.getMessage());
         }
 
+        // Send QUIT
+        message = "QUIT\n";
+        bytes = message.getBytes();
+        out.write(bytes);
+        System.out.println("Sent message to server: " + message);
+
+        // Recieve QUIT
+        response = reader.readLine();
+        System.out.println("Received message from server: " + response);
+
+        // Close the socket
+        out.close();
+        reader.close();
+        socket.close();
     }
 
 }
